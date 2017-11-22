@@ -1,0 +1,67 @@
+package com.nuctech.platform.zuul.filters;
+
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
+import com.nuctech.platform.util.TokenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.servlet.http.Cookie;
+
+import java.util.Arrays;
+import java.util.HashMap;
+
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
+
+/**
+ * Created by wangzunhui on 2017/7/31.
+ */
+@Component
+public class CsrfPreFilter extends ZuulFilter {
+    private final Logger logger = LoggerFactory.getLogger(CsrfPreFilter.class);
+
+    @Override
+    public String filterType() {
+        return PRE_TYPE;
+    }
+
+    @Override
+    public int filterOrder() {
+        return 4;
+    }
+
+    @Override
+    public boolean shouldFilter() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        return ctx.get("sendZuulResponse") == null? true : false;
+    }
+
+    @Override
+    public Object run() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        //logger.info("3------------csrf filter---------" + ctx.getRequest().getRequestURI());
+        if (!"POST".equalsIgnoreCase(ctx.getRequest().getMethod())){
+            return null;
+        }
+
+        String csrfToken = ctx.getRequest().getHeader(TokenUtil.X_CSRF_TOKEN);
+        Cookie[] cookies = ctx.getRequest().getCookies();
+        if (StringUtils.isEmpty(csrfToken) || cookies == null){
+            AuthPreFilter.rejectZuul(403, "not_found_csrf_or_token");
+            return null;
+        }
+
+        boolean find = Arrays.stream(cookies)
+                .anyMatch(c -> (
+                        TokenUtil.TOKEN.equalsIgnoreCase(c.getName()) &&
+                        TokenUtil.checkCSRFToken(c.getValue(), csrfToken)
+                ));
+        if (!find){
+            AuthPreFilter.rejectZuul(403, "invalid_csrf_token");
+        }
+
+        return null;
+    }
+}
