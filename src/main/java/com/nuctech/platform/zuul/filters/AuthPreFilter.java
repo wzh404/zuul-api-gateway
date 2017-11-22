@@ -25,7 +25,7 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
  */
 @Component
 public class AuthPreFilter extends ZuulFilter {
-    private final Logger logger = LoggerFactory.getLogger(AuthPreFilter.class);
+    //private final Logger logger = LoggerFactory.getLogger(AuthPreFilter.class);
 
     public static final Cache<String, List<String>> cache = CacheBuilder.newBuilder().build();
 
@@ -42,7 +42,7 @@ public class AuthPreFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class AuthPreFilter extends ZuulFilter {
     @Override
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
-        logger.info("2.------------auth filter---------" + ctx.getRequest().getRequestURI());
+        //logger.info("2.------------auth filter---------" + ctx.getRequest().getRequestURI());
         // check token
         Optional<String> token = HttpRequestUtil.getCookieValue(ctx.getRequest(), TokenUtil.TOKEN);
         if (!token.isPresent()){
@@ -91,6 +91,7 @@ public class AuthPreFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.setSendZuulResponse(false);
         ctx.setResponseStatusCode(status);
+        //TODO add i18n
         ctx.setResponseBody(body);
     }
 

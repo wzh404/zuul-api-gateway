@@ -7,9 +7,6 @@ import com.nuctech.platform.util.CryptoUtil;
 import com.nuctech.platform.util.HttpRequestUtil;
 import com.nuctech.platform.util.KeyPool;
 import com.nuctech.platform.util.TokenUtil;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.UsernamePasswordToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +22,8 @@ import java.util.Map;
 
 /**
  * Created by wangzunhui on 2017/8/1.
+ *
+ * test
  */
 @RestController
 public class UserController {
@@ -109,13 +108,13 @@ public class UserController {
         Cookie cookie = new Cookie(TokenUtil.TOKEN, jwtToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        // TODO change to true in https
+
         cookie.setSecure(false);
 
         Cookie langCookie = new Cookie("lang", "en_US");
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-        // TODO change to true in https
+
         cookie.setSecure(false);
 
         Cookie csrfCookie = new Cookie(TokenUtil.CSRF_TOKEN, csrfToken);

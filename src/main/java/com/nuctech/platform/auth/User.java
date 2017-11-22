@@ -1,9 +1,6 @@
 package com.nuctech.platform.auth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * Created by wangzunhui on 2017/10/10.

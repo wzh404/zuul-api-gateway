@@ -29,7 +29,7 @@ public class CsrfPreFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 4;
+        return 5;
     }
 
     @Override

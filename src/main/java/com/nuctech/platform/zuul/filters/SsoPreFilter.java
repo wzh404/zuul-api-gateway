@@ -29,7 +29,7 @@ public class SsoPreFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class SsoPreFilter extends ZuulFilter {
                     return "";
                 })
                 .orElseGet(()->{
-                    AuthPreFilter.rejectZuul(403, "invalid_token");
+                    AuthPreFilter.rejectZuul(403, "api_invalid_token");
                     return null;
                 });
     }
