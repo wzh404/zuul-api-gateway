@@ -13,14 +13,16 @@ import javax.servlet.http.Cookie;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static com.nuctech.platform.util.ErrorCodeEnum.API_CSRF_OR_TOKEN_NOT_FOUND;
+import static com.nuctech.platform.util.ErrorCodeEnum.API_INVALID_CSRF_TOKEN;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
 /**
- * Created by wangzunhui on 2017/7/31.
+ * Created by @author wangzunhui on 2017/7/31.
  */
 @Component
 public class CsrfPreFilter extends ZuulFilter {
-    private final Logger logger = LoggerFactory.getLogger(CsrfPreFilter.class);
+    //private final Logger logger = LoggerFactory.getLogger(CsrfPreFilter.class);
 
     @Override
     public String filterType() {
@@ -35,7 +37,7 @@ public class CsrfPreFilter extends ZuulFilter {
     @Override
     public boolean shouldFilter() {
         RequestContext ctx = RequestContext.getCurrentContext();
-        return ctx.get("sendZuulResponse") == null? true : false;
+        return ctx.get("sendZuulResponse") == null;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class CsrfPreFilter extends ZuulFilter {
         String csrfToken = ctx.getRequest().getHeader(TokenUtil.X_CSRF_TOKEN);
         Cookie[] cookies = ctx.getRequest().getCookies();
         if (StringUtils.isEmpty(csrfToken) || cookies == null){
-            AuthPreFilter.rejectZuul(403, "not_found_csrf_or_token");
+            AuthPreFilter.rejectZuul(403, API_CSRF_OR_TOKEN_NOT_FOUND);
             return null;
         }
 
@@ -59,7 +61,7 @@ public class CsrfPreFilter extends ZuulFilter {
                         TokenUtil.checkCSRFToken(c.getValue(), csrfToken)
                 ));
         if (!find){
-            AuthPreFilter.rejectZuul(403, "invalid_csrf_token");
+            AuthPreFilter.rejectZuul(403, API_INVALID_CSRF_TOKEN);
         }
 
         return null;

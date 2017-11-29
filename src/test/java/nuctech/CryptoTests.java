@@ -3,6 +3,8 @@ package nuctech;
 import com.nuctech.platform.auth.User;
 import com.nuctech.platform.util.CryptoUtil;
 import com.nuctech.platform.util.KeyPool;
+import com.nuctech.platform.util.TokenUtil;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ public class CryptoTests {
     private final Logger logger = LoggerFactory.getLogger(CryptoTests.class);
 
     @Test
-    public void testKeyPool(){
+    public void testKeyPool() {
         String key = KeyPool.getKey("wangzh-ok");
         logger.info("key is " + key);
         /*for (int i = 0; i < 32; i++){
@@ -28,25 +30,22 @@ public class CryptoTests {
         Assert.assertTrue(key != null);
     }
 
-    @Test()
-    public void testAES() throws Exception{
+    @Test
+    public void testAES() throws Exception {
         String key = KeyPool.getKey("wangzh-ok");
         String encrypted = CryptoUtil.encrypt("nuctech.com", key);
         logger.info(encrypted);
         Assert.assertTrue(encrypted != null);
-
-        User u1 = new User();
-        User u2 = new User();
-        u2.s();
-        u1.p();
-        u2.p();
-
-        //long a = 1L * b * 2;
-        logger.info("long = {}", t());
     }
 
-    public long t(){
-        int b = Integer.MAX_VALUE;
-        return b * 2;
+    @Test
+    public void testToken() throws Exception {
+        String token = TokenUtil.generatorToken("wangzh");
+        logger.info("token is [" + token +"]");
+        Thread.sleep(13000L);
+        TokenUtil.TokenResult r = TokenUtil.checkAndGetUid(token);
+
+        Assert.assertTrue(r.getCode() >= 0);
+        Assert.assertTrue(r.getCode() == 0);
     }
 }

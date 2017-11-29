@@ -3,14 +3,17 @@ package com.nuctech.platform.zuul.filters;
 import com.google.common.util.concurrent.RateLimiter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.nuctech.platform.util.ErrorCodeEnum.API_RATE_LIMITER;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
 /**
- * Created by wangzunhui on 2017/11/22.
+ * Created by @author wangzunhui on 2017/11/22.
  */
+@Component
 public class RateLimiterPreFilter extends ZuulFilter {
     private static ConcurrentHashMap<String, RateLimiter> rateLimiterMap = new ConcurrentHashMap<>(64);
 
@@ -36,7 +39,7 @@ public class RateLimiterPreFilter extends ZuulFilter {
         rateLimiterMap.putIfAbsent(uri, RateLimiter.create(10.0f));
         RateLimiter limiter = rateLimiterMap.get(uri);
         if (!limiter.tryAcquire()){
-            AuthPreFilter.rejectZuul( 403, "api_rate_limiter");
+            AuthPreFilter.rejectZuul( 403, API_RATE_LIMITER);
             return null;
         }
 

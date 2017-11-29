@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.ROUTE_TYPE;
 
 /**
- * Created by wangzunhui on 2017/8/13.
+ * Created by @author wangzunhui on 2017/8/13.
  */
 @Component
 public class SignatureRouteFilter extends ZuulFilter {
-    private final Logger logger = LoggerFactory.getLogger(SignatureRouteFilter.class);
+    //private final Logger logger = LoggerFactory.getLogger(SignatureRouteFilter.class);
 
     @Override
     public String filterType() {
@@ -38,8 +38,8 @@ public class SignatureRouteFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         //logger.info("4.------------sign route filter---------" + ctx.getRequest().getRequestURI());
 
-        String uid = (String)ctx.getRequest().getAttribute("user-name");
-        String tid = (String)ctx.getRequest().getAttribute("trace-no");
+        String uid = (String)ctx.getRequest().getAttribute(SsoPreFilter.REQUEST_ATTRIBUTE_UID);
+        String tid = (String)ctx.getRequest().getAttribute(SsoPreFilter.REQUEST_ATTRIBUTE_TRA);
         String signature = CryptoUtil.signature(KeyPool.DEFAULT_KEY, uid, tid);
 
         ctx.addZuulRequestHeader("X-USER-ID", uid);

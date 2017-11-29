@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by wangzunhui on 2017/9/26.
+ * Created by @author wangzunhui on 2017/9/26.
  */
 public class IPRateLimiter {
     private final Cache<String, Integer> cache;

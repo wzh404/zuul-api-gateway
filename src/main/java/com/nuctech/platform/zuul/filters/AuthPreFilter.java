@@ -6,6 +6,7 @@ import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.nuctech.platform.auth.UserPermission;
 import com.nuctech.platform.auth.UserService;
+import com.nuctech.platform.util.ErrorCodeEnum;
 import com.nuctech.platform.util.HttpRequestUtil;
 import com.nuctech.platform.util.TokenUtil;
 import org.slf4j.Logger;
@@ -18,10 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.nuctech.platform.util.ErrorCodeEnum.*;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
 /**
- * Created by wangzunhui on 2017/9/21.
+ * Created by @author wangzunhui on 2017/9/21.
  */
 @Component
 public class AuthPreFilter extends ZuulFilter {
@@ -54,45 +56,30 @@ public class AuthPreFilter extends ZuulFilter {
     @Override
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
-        //logger.info("2.------------auth filter---------" + ctx.getRequest().getRequestURI());
-        // check token
-        Optional<String> token = HttpRequestUtil.getCookieValue(ctx.getRequest(), TokenUtil.TOKEN);
-        if (!token.isPresent()){
-            rejectZuul( 403, "api_token_not_found");
-            return null;
-        }
+        String uid = (String)ctx.getRequest().getAttribute(SsoPreFilter.REQUEST_ATTRIBUTE_UID);
+        assert(uid == null);
 
-        // check uid
-        Optional<String> optional = TokenUtil.checkAndGetUid(token.get());
-        if (!optional.isPresent()){
-            rejectZuul( 403, "api_invalid_token");
-            return null;
-        }
-
-        // check user permission
-        String uid = optional.get();
         List<String> uris = getUserPermissions(uid);
         if (uris.isEmpty()){
-            rejectZuul(403, "api_empty_user_permission");
+            rejectZuul(403, API_EMPTY_USER_PERMISSION);
             return null;
         }
 
         // match uri
         String uri = ctx.getRequest().getRequestURI();
         if (!uris.stream().anyMatch(m -> pathMatcher.match(m, uri))){
-            rejectZuul( 403, "api_not_permit");
+            rejectZuul( 403, API_NOT_PERMIT);
             return null;
         }
 
         return null;
     }
 
-    public static void rejectZuul(int status, String body){
+    public static void rejectZuul(int status, ErrorCodeEnum err){
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.setSendZuulResponse(false);
         ctx.setResponseStatusCode(status);
-        //TODO add i18n
-        ctx.setResponseBody(body);
+        ctx.setResponseBody(err.getCode());
     }
 
     /**
