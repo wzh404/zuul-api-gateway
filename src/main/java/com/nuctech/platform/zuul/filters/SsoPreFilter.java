@@ -43,6 +43,18 @@ public class SsoPreFilter extends ZuulFilter {
         return true;
     }
 
+    @Override
+    public Object run() {
+        RequestContext ctx = RequestContext.getCurrentContext();
+        Optional<String> token = HttpRequestUtil.getCookieValue(ctx.getRequest(), TokenUtil.TOKEN);
+        return token.map(TokenUtil::checkAndGetUid)
+                .map(SsoPreFilter::handleToken)
+                .orElseGet(() -> {
+                    AuthPreFilter.rejectZuul(403, API_INVALID_TOKEN);
+                    return null;
+                });
+    }
+
     private static String handleToken(TokenUtil.TokenResult r) {
         if (r.getCode() < 0) {
             return null;
@@ -64,17 +76,5 @@ public class SsoPreFilter extends ZuulFilter {
             ctx.getResponse().addCookie(c);
         }
         return StringUtils.EMPTY;
-    }
-
-    @Override
-    public Object run() {
-        RequestContext ctx = RequestContext.getCurrentContext();
-        Optional<String> token = HttpRequestUtil.getCookieValue(ctx.getRequest(), TokenUtil.TOKEN);
-        return token.map(TokenUtil::checkAndGetUid)
-                .map(SsoPreFilter::handleToken)
-                .orElseGet(() -> {
-                    AuthPreFilter.rejectZuul(403, API_INVALID_TOKEN);
-                    return null;
-                });
     }
 }

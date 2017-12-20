@@ -31,12 +31,12 @@ public class TokenUtil {
      * data:
      *     uid.time.uuid
      *     -------------
-     *         BASE64
+     *
      * sign:
-     *     signature(base64)
+     *     signature(data)
      *
      * token:
-     *     BASE64.sign
+     *     BASE64(data).sign
      *
      * @param uid 用户认证ID
      * @return token值
@@ -129,10 +129,14 @@ public class TokenUtil {
 
     /**
      * 根据单点登录token生成csrf token
+     *
+     * uid.current_time
+     * ----------------
+     *     signature
      */
-    public static String generatorCSRFToken(String token) {
+    public static String generatorCSRFToken(String uid) {
         String currentTime = Long.toString(System.currentTimeMillis());
-        String signature = CryptoUtil.signature(KeyPool.DEFAULT_KEY, token, currentTime);
+        String signature = CryptoUtil.signature(KeyPool.DEFAULT_KEY, uid, currentTime);
 
         return currentTime + "." + signature;
     }
@@ -140,12 +144,12 @@ public class TokenUtil {
     /**
      * 检查csrf token是否合法
      *
-     * @param token     jwt单点token
+     * @param uid     user id
      * @param csrfToken 需要检查的csrf token
      * @return true 合法, false 无效
      */
-    public static boolean checkCSRFToken(String token, String csrfToken) {
-        if (token == null || csrfToken == null) {
+    public static boolean checkCSRFToken(String uid, String csrfToken) {
+        if (uid == null || csrfToken == null) {
             return false;
         }
 
@@ -157,13 +161,7 @@ public class TokenUtil {
         String currentTime = tokens[0];
         String signature = tokens[1];
 
-        // TODO check token expired
-        //long time = Long.parseLong(currentTime);
-        //if (((System.currentTimeMillis() - time) / 1000) > 60) {
-        //    return false;
-        //}
-
-        String encrypted = CryptoUtil.signature(KeyPool.DEFAULT_KEY, token, currentTime);
+        String encrypted = CryptoUtil.signature(KeyPool.DEFAULT_KEY, uid, currentTime);
         return signature.equalsIgnoreCase(encrypted);
     }
 }

@@ -7,8 +7,6 @@ import com.netflix.zuul.context.RequestContext;
 import com.nuctech.platform.auth.UserPermission;
 import com.nuctech.platform.auth.UserService;
 import com.nuctech.platform.util.ErrorCodeEnum;
-import com.nuctech.platform.util.HttpRequestUtil;
-import com.nuctech.platform.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import org.springframework.util.AntPathMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.nuctech.platform.util.ErrorCodeEnum.*;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
@@ -50,7 +47,7 @@ public class AuthPreFilter extends ZuulFilter {
     @Override
     public boolean shouldFilter() {
         RequestContext ctx = RequestContext.getCurrentContext();
-        return ctx.get("sendZuulResponse") == null? true : false;
+        return  ctx.sendZuulResponse();//ctx.get("sendZuulResponse") == null? true : false;
     }
 
     @Override

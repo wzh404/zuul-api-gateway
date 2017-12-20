@@ -15,7 +15,7 @@ import java.util.Map;
  */
 @ControllerAdvice
 public class NuctechFrameworkExceptionHandler {
-    private final static Logger logger = LoggerFactory.getLogger(NuctechFrameworkExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(NuctechFrameworkExceptionHandler.class);
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody

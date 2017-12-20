@@ -18,7 +18,7 @@ public class JSnowFlake {
     private static final int timestampShift = 22;
     private static final long sequenceMask = -1 ^ (-1 << sequenceBits);
 
-    private Lock lock ;
+    private Lock lock;
     private long workerId;
     private long sequence;
     private long lastTimeStamp;
