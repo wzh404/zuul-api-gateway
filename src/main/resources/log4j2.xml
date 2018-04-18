@@ -21,7 +21,7 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <logger name="com.nuctech.platform.zuul.filters.AccessLoggerPostFilter" level="info" additivity="false">
+        <logger name="com.nuctech.platform.zuul.filters.post.AccessLoggerPostFilter" level="info" additivity="false">
             <AppenderRef ref="access-log" />
         </logger>
 

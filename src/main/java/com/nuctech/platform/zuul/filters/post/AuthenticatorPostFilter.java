@@ -1,4 +1,4 @@
-package com.nuctech.platform.zuul.filters;
+package com.nuctech.platform.zuul.filters.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.zuul.ZuulFilter;
@@ -7,7 +7,7 @@ import com.netflix.zuul.exception.ZuulException;
 import com.nuctech.platform.auth.bean.AuthenticatorResponse;
 import com.nuctech.platform.auth.service.UserService;
 import com.nuctech.platform.util.TokenUtil;
-import com.sun.corba.se.impl.oa.toa.TOA;
+import com.nuctech.platform.zuul.filters.support.FilterConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class AuthenticatorPostFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 2;
+        return FilterConstants.POST_AUTHENTICATOR_FILTER_ORDER;
     }
 
     @Override

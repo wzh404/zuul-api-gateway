@@ -1,4 +1,4 @@
-package com.nuctech.platform.zuul.filters;
+package com.nuctech.platform.zuul.filters.pre;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
@@ -8,6 +8,7 @@ import com.nuctech.platform.auth.whitelist.Whitelists;
 import com.nuctech.platform.util.HttpRequestUtil;
 import com.nuctech.platform.util.JSnowFlake;
 import com.nuctech.platform.util.TokenUtil;
+import com.nuctech.platform.zuul.filters.support.FilterConstants;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class AuthenticatorPreFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 3;
+        return FilterConstants.PRE_AUTHENTICATOR_FILTER_ORDER;
     }
 
     @Override

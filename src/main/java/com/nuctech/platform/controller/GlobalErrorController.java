@@ -2,7 +2,6 @@ package com.nuctech.platform.controller;
 
 import com.nuctech.platform.util.ErrorCodeEnum;
 import com.nuctech.platform.util.HttpRequestUtil;
-import com.nuctech.platform.zuul.filters.AuthenticatorPreFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

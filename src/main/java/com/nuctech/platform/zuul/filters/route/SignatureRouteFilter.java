@@ -1,4 +1,4 @@
-package com.nuctech.platform.zuul.filters;
+package com.nuctech.platform.zuul.filters.route;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
@@ -6,6 +6,8 @@ import com.nuctech.platform.auth.bean.User;
 import com.nuctech.platform.auth.whitelist.Whitelists;
 import com.nuctech.platform.util.CryptoUtil;
 import com.nuctech.platform.util.KeyPool;
+import com.nuctech.platform.zuul.filters.pre.AuthenticatorPreFilter;
+import com.nuctech.platform.zuul.filters.support.FilterConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,7 @@ public class SignatureRouteFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 9;
+        return FilterConstants.ROUTING_SIGNATURE_FILTER_ORDER;
     }
 
     /**

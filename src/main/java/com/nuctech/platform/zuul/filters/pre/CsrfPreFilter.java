@@ -1,10 +1,11 @@
-package com.nuctech.platform.zuul.filters;
+package com.nuctech.platform.zuul.filters.pre;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.nuctech.platform.auth.whitelist.Whitelists;
 import com.nuctech.platform.util.HttpRequestUtil;
 import com.nuctech.platform.util.TokenUtil;
+import com.nuctech.platform.zuul.filters.support.FilterConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class CsrfPreFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 5;
+        return FilterConstants.PRE_CSRF_FILTER_ORDER;
     }
 
     @Override

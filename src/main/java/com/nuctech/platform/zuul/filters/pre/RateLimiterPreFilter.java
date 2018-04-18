@@ -1,9 +1,10 @@
-package com.nuctech.platform.zuul.filters;
+package com.nuctech.platform.zuul.filters.pre;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.nuctech.platform.util.HttpRequestUtil;
+import com.nuctech.platform.zuul.filters.support.FilterConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ public class RateLimiterPreFilter extends ZuulFilter {
      */
     @Override
     public int filterOrder() {
-        return 2;
+        return FilterConstants.PRE_RATELIMITER_FILTER_ORDER;
     }
 
     @Override
