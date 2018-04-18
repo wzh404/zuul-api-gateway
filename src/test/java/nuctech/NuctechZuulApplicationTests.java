@@ -1,13 +1,7 @@
 package nuctech;
 
 import com.nuctech.platform.NuctechZuulApplication;
-//import com.nuctech.framework.extension.ExtensionLoader;
-import com.nuctech.platform.auth.User;
-import com.nuctech.platform.auth.UserService;
 import com.nuctech.platform.util.TokenUtil;
-//import com.nuctech.framework.service.CacheService;
-//import com.nuctech.framework.service.LocalCacheService;
-//import com.nuctech.framework.service.RedisCacheService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.cache.RedisCache;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -31,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.Filter;
 import javax.servlet.http.Cookie;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -43,11 +42,14 @@ public class NuctechZuulApplicationTests {
     @Autowired
     private WebApplicationContext context;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     //@Autowired
     //protected User user;
 
     //@Mock
-    //private UserService userService;
+    //private UrpmService userService;
 
     private MockMvc mockMvc;
 
@@ -81,10 +83,16 @@ public class NuctechZuulApplicationTests {
 //    }
 
     @Test
-    public void testSpringNamespace(){
-        //Assert.assertTrue("0200".equals(user.getResultCode()));
-    }
+    public void testRedis(){
+        ValueOperations vo = redisTemplate.opsForValue();
+        String key = "user:authority:1";
 
+        vo.set(key, "url1,url2");
+        String a = (String)vo.get(key);
+        logger.info(a);
+        Assert.assertTrue(true);
+    }
+/*
     @Test
     public void testSloginController() throws Exception{
         token = mockMvc.perform(get("/slogin")
@@ -122,5 +130,15 @@ public class NuctechZuulApplicationTests {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is(200))
                 .andDo(MockMvcResultHandlers.print());
+    }*/
+
+    @Test
+    public void testToken() throws Exception {
+        String token = TokenUtil.generateXCSRFToken();
+        Assert.assertTrue(token.length() == 32);
+        Assert.assertTrue(TokenUtil.checkXCSRFToken(token));
+
+        String scsrf = TokenUtil.generateSCSRFToken(token);
+        Assert.assertTrue(TokenUtil.checkSCSRFToken(token, scsrf));
     }
 }
