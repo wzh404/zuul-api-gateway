@@ -5,7 +5,6 @@ import com.nuctech.platform.auth.service.UserService;
 import com.nuctech.platform.auth.whitelist.Whitelists;
 import com.nuctech.platform.util.ErrorCodeEnum;
 import com.nuctech.platform.util.TokenUtil;
-import com.nuctech.platform.zuul.filters.AuthenticatorPreFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +27,12 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
 
     private final Map<String, NextHop> nextHops = new ConcurrentHashMap<>();
     private final String remoteUri;
+    private final UserService userService;
+    private final Whitelists whitelists;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private Whitelists whitelists;
-
-    public WebSocketProxyServerHandler(String remoteUri){
+    public WebSocketProxyServerHandler(UserService userService, Whitelists whitelists, String remoteUri){
+        this.userService = userService;
+        this.whitelists = whitelists;
         this.remoteUri = remoteUri;
     }
 

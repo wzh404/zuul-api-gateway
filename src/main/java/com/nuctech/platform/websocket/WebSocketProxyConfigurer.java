@@ -1,5 +1,8 @@
 package com.nuctech.platform.websocket;
 
+import com.nuctech.platform.auth.service.UserService;
+import com.nuctech.platform.auth.whitelist.Whitelists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.client.standard.WebSocketContainerFactoryBean;
@@ -13,9 +16,15 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 public class WebSocketProxyConfigurer implements WebSocketConfigurer {
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private Whitelists whitelists;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new WebSocketProxyServerHandler("ws://localhost:9000/ws"), "/ws");
+        registry.addHandler(new WebSocketProxyServerHandler(userService, whitelists, "ws://localhost:9000/ws"), "/ws");
     }
 
     @Bean
