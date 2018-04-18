@@ -6,17 +6,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import java.util.Locale;
 
 /**
- * Created by wangzunhui on 2017/8/14.
+ * Created by @author wangzunhui on 2017/8/14.
  */
 @Configuration
-public class InternationalConfiguration extends WebMvcConfigurerAdapter {
+public class InternationalConfiguration implements WebMvcConfigurer {
     @Value(value = "${spring.messages.basename}")
     private String basename;
 

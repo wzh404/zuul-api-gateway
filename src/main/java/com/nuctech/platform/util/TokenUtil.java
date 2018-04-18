@@ -1,167 +1,234 @@
 package com.nuctech.platform.util;
 
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.Base64;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 /**
- * Created by wangzunhui on 2017/7/17.
+ * Created by @author wangzunhui on 2017/7/17.
  */
 public class TokenUtil {
     private static final Logger logger = LoggerFactory.getLogger(TokenUtil.class);
-    private static final long EXPIRED_TIME = 1000 * 60 * 30L;
 
-    public static final String TOKEN = "token";
-    public static final String CSRF_TOKEN = "csrf-token";
-    public static final String X_CSRF_TOKEN = "x-csrf-token";
+    public static final String TOKEN = "_user_token";
+    public static final String S_CSRF_TOKEN = "S-CSRF-TOKEN";
+    public static final String X_CSRF_TOKEN = "X-CSRF-TOKEN";
+
+    public static final int X_CSRF_TOKEN_SIZE = 32;
 
     private TokenUtil() {
         throw new IllegalStateException("Utility Token");
     }
 
     /**
-     * 根据uid进行签名，并生成token
+     * generate x-csrf-token.
      *
-     * uid:
-     *     AES(uid)
-     *
-     * data:
-     *     uid.time.uuid
-     *     -------------
-     *
-     * sign:
-     *     signature(data)
-     *
-     * token:
-     *     BASE64(data).sign
-     *
-     * @param uid 用户认证ID
-     * @return token值
+     * @return
      */
-    public static String generatorToken(String uid) {
-        assert (uid != null);
+    public static String generateXCSRFToken() {
+        String rand = fixedRandom(10);
+        long time = System.currentTimeMillis();
+        String key = KeyPool.getKey(time);
 
-        long expired = System.currentTimeMillis() + TokenUtil.EXPIRED_TIME;
-        String aesKey = KeyPool.getKey(expired);
+        String signature = CryptoUtil.signature(key, rand, Long.toString(time));
+        StringBuilder token = new StringBuilder(rand);
+        token.append(time);
+        token.append(signature.substring(signature.length() - 9));
 
-        String token = CryptoUtil.encrypt(uid, aesKey) +
-                "." + expired +
-                "." + UUID.randomUUID();
-
-        return Base64.getUrlEncoder().encodeToString(token.getBytes()) +
-                "." +
-                CryptoUtil.signature(token, KeyPool.DEFAULT_KEY);
+        return token.toString();
     }
 
     /**
-     * 检查token并获取token中的uid,Token重置条件大于1分钟
+     * check if x-csrf-token is valid.
      *
-     * @param token token值
-     * @return result
-     *      -1 : expired or invalid
-     *       1 : reset token
-     *       0 : ok
+     * @param xCsrfToken
+     * @return
      */
-    public static TokenResult checkAndGetUid(String token) {
-        assert (token != null);
+    public static boolean checkXCSRFToken(String xCsrfToken){
+        if (xCsrfToken == null || xCsrfToken.length() != X_CSRF_TOKEN_SIZE){
+            return false;
+        }
+
+        long time = getTokenTime(xCsrfToken);
+        String key = KeyPool.getKey(time);
+        String signed = xCsrfToken.substring(xCsrfToken.length() - 9);
+        String data = xCsrfToken.substring(0, 23);
+        String newSigned = CryptoUtil.signature(key, data);
+
+        return newSigned.substring(newSigned.length() - 9).equalsIgnoreCase(signed);
+    }
+
+    /**
+     * genarate s-csrf-token by x-csrf-token.
+     *
+     * @param xCsrfToken
+     * @return
+     */
+    public static String generateSCSRFToken(String xCsrfToken){
+        if (xCsrfToken == null || xCsrfToken.length() != X_CSRF_TOKEN_SIZE){
+            return null;
+        }
+
+        long time = getTokenTime(xCsrfToken);
+        String key = KeyPool.getKey(time);
+
+        return CryptoUtil.signature(key, xCsrfToken);
+    }
+
+    /**
+     * check if s-csrf-token is valid.
+     *
+     * @param xCsrfToken
+     * @param sCsrfToken
+     * @return
+     */
+    public static boolean checkSCSRFToken(String xCsrfToken, String sCsrfToken){
+        if (xCsrfToken == null || xCsrfToken.length() != X_CSRF_TOKEN_SIZE){
+            return false;
+        }
+
+        if (!checkXCSRFToken(xCsrfToken)){
+            return false;
+        }
+
+        long time = getTokenTime(xCsrfToken);
+        String key = KeyPool.getKey(time);
+        String signed = CryptoUtil.signature(key, xCsrfToken);
+
+        return signed.equalsIgnoreCase(sCsrfToken);
+    }
+
+    /**
+     * get timestampe from x-csrf-token string.
+     *
+     * @param xcsrfToken
+     * @return
+     */
+    private static long getTokenTime(String xcsrfToken){
+        return Long.valueOf(xcsrfToken.substring(10, 23));
+    }
+
+    /**
+     * create jwt token by json string of user.
+     *
+     * @param json
+     * @return
+     */
+    public static Optional<String> createJwtToken(String json){
+        if (json == null){
+            return Optional.empty();
+        }
+
+        String payload = new String(Base64.getEncoder().encode(json.getBytes()));
+        StringBuilder token = new StringBuilder(payload);
+        String signed = CryptoUtil.signature(payload, KeyPool.DEFAULT_KEY);
+        token.append(".");
+        token.append(signed);
+
+        return Optional.of(token.toString());
+    }
+
+    /**
+     * decode jwt payload
+     *
+     * @param token
+     * @return jwt payload(json string of user)
+     */
+    public static Optional<String> decodeJwt(String token){
+        if (token == null) {
+            logger.error("Jwt token is null");
+            return Optional.empty();
+        }
 
         String[] tokens = token.split("\\.");
         if (tokens == null || tokens.length != 2) {
-            logger.error("invalid token");
-            return new TokenResult(-1, null);
+            logger.error("Invalid jwt token");
+            return Optional.empty();
         }
+
         String signature = tokens[1];
+        String signed = CryptoUtil.signature(tokens[0], KeyPool.DEFAULT_KEY);
+        if (!signature.equalsIgnoreCase(signed)) {
+            logger.error("Invalid signature data");
+            return Optional.empty();
+        }
+
         String payload = new String(Base64.getUrlDecoder().decode(tokens[0].getBytes()));
-        String[] data = payload.split("\\.");
-        if (data == null || data.length != 3) {
-            logger.error("invalid token data");
-            return new TokenResult(-1, null);
-        }
-
-        // check signature
-        String mac = CryptoUtil.signature(payload, KeyPool.DEFAULT_KEY);
-        if (!signature.equalsIgnoreCase(mac)) {
-            logger.error("signature failed");
-            return new TokenResult(-1, null);
-        }
-
-        // check time
-        long expired = 0L;
-        try {
-            expired = Long.parseLong(data[1]);
-        } catch (NumberFormatException e) {
-            logger.error("exception: ", e);
-            return new TokenResult(-1, null);
-        }
-        String aesKey = KeyPool.getKey(expired);
-        String encryptedUid = data[0];
-        String uid = CryptoUtil.decrypt(encryptedUid, aesKey);
-
-        long expiredTime = expired - System.currentTimeMillis();
-        if (expiredTime <= 0) {
-            logger.error("token expired");
-            return new TokenResult(-1, null);
-        }
-
-        long diffTime = (EXPIRED_TIME - expiredTime) / 1000L;
-        logger.info("diff " + diffTime);
-        if (diffTime > 1 * 60L) {
-            logger.warn("reset token");
-            return new TokenResult(1, uid);
-        }
-
-        return  new TokenResult(0, uid);
+        return Optional.of(payload);
     }
 
-    @Data
-    public static class TokenResult {
-        private int code;
-        private String value;
+    /*
+    public static String createSessionId(String uid){
+        ByteBuffer bb = ByteBuffer.wrap(new byte[32]);
 
-        public TokenResult(int code, String value){
-            this.code = code;
-            this.value = value;
-        }
+        byte[] hash = Hashing.sha256()
+                .hashString(uid, Charset.forName("utf-8"))
+                .asBytes();
+        byte[] uuid = asBytes(UUID.randomUUID());
+
+        bb.put(hash, 0, 16);
+        bb.put(uuid, 0, 16);
+
+        return byteArrayToHexStr(bb.array());
+    }
+*/
+
+    /**
+     * generate user login session id.
+     *
+     * @return
+     */
+    public static String createSessionId(){
+        return byteArrayToHexStr(asBytes(UUID.randomUUID()));
     }
 
     /**
-     * 根据单点登录token生成csrf token
+     * convert uuid to byte array.
      *
-     * uid.current_time
-     * ----------------
-     *     signature
+     * @param uuid
+     * @return
      */
-    public static String generatorCSRFToken(String uid) {
-        String currentTime = Long.toString(System.currentTimeMillis());
-        String signature = CryptoUtil.signature(KeyPool.DEFAULT_KEY, uid, currentTime);
-
-        return currentTime + "." + signature;
+    public static byte[] asBytes(UUID uuid) {
+        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+        bb.putLong(uuid.getMostSignificantBits());
+        bb.putLong(uuid.getLeastSignificantBits());
+        return bb.array();
     }
 
     /**
-     * 检查csrf token是否合法
+     * convert byte array to hex string.
      *
-     * @param uid     user id
-     * @param csrfToken 需要检查的csrf token
-     * @return true 合法, false 无效
+     * @param byteArray
+     * @return
      */
-    public static boolean checkCSRFToken(String uid, String csrfToken) {
-        if (uid == null || csrfToken == null) {
-            return false;
+    public static String byteArrayToHexStr(byte[] byteArray) {
+        if (byteArray == null){
+            return null;
         }
 
-        String[] tokens = csrfToken.split("\\.");
-        if (tokens == null || tokens.length != 2) {
-            return false;
+        char[] hexArray = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[byteArray.length * 2];
+        for (int j = 0; j < byteArray.length; j++) {
+            int v = byteArray[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
+        return new String(hexChars);
+    }
 
-        String currentTime = tokens[0];
-        String signature = tokens[1];
-
-        String encrypted = CryptoUtil.signature(KeyPool.DEFAULT_KEY, uid, currentTime);
-        return signature.equalsIgnoreCase(encrypted);
+    /**
+     * get random string by length.
+     *
+     * @param len
+     * @return
+     */
+    public static String fixedRandom(int len){
+        double r = (1+ new Random().nextDouble()) * Math.pow(10, len);
+        return String.valueOf(Math.round(r)).substring(0,len);
     }
 }

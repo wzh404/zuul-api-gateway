@@ -101,7 +101,7 @@ public class CryptoUtil {
     public static String signature(String salt, String... args){
         assert(salt != null);
 
-        Hasher hasher = Hashing.sha512().newHasher();
+        Hasher hasher = Hashing.sha256().newHasher();
         hasher.putString(salt, Charset.forName("utf-8"));
         for (String arg : args){
             if (!StringUtils.isEmpty(arg)){

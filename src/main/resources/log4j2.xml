@@ -2,19 +2,36 @@
 <Configuration status="off" monitorInterval="1800">
     <Appenders>
         <Console name="nuctech">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %p [%thread] %l traceId:[%X{Trace-Id}] - %m%n" />
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %p [%thread] [%X{tracking}] %l - %m%n" />
         </Console>
 
         <Console name="stdout">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %p [%thread] %l - %m%n" />
         </Console>
+
+        <RollingFile name="access-log" fileName="e:/logs/access.log"
+            filePattern="e:/logs/$${date:yyyy-MM}/access-%d{yyyy-MM-dd}-%i.log">
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %p [%thread] [%X{tracking}] %l - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
+        <logger name="com.nuctech.platform.zuul.filters.AccessLoggerPostFilter" level="info" additivity="false">
+            <AppenderRef ref="access-log" />
+        </logger>
+
         <logger name="com.nuctech.platform" level="info" additivity="false">
             <AppenderRef ref="nuctech" />
         </logger>
 
-        <Root level="info">
+        <logger name="org.springframework" level="INFO" ></logger>
+        <logger name="org.mybatis" level="INFO" ></logger>
+        <Root level="error">
             <AppenderRef ref="stdout" />
         </Root>
     </Loggers>

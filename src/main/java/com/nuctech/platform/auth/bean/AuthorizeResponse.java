@@ -1,4 +1,4 @@
-package com.nuctech.platform.auth;
+package com.nuctech.platform.auth.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -8,23 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by wangzunhui on 2017/10/17.
+ * User authority returned from the urpm.
+ * <p>
+ * Created by @author wangzunhui on 2017/10/17.
  */
 @Data
-public class UserPermission {
+public class AuthorizeResponse {
     @JsonProperty("flag")
     private Boolean flag;
 
     @JsonProperty("result")
     private Result result;
 
-    public List<String> getPermissions(){
+    public List<String> getUserAuthority() {
         List<String> list = new ArrayList<>();
-        if (!getFlag()){
+        if (!getFlag()) {
             return list;
         }
 
-        getResult().getPermissions().stream()
+        getResult().getPermissions()
+                .stream()
                 .filter(p -> StringUtils.isNotEmpty(p.getUrl()))
                 .forEach(p -> list.add(p.getUrl()));
 
@@ -32,13 +35,13 @@ public class UserPermission {
     }
 
     @Data
-    static class Result{
+    static class Result {
         @JsonProperty("userPermissions")
         List<Permission> permissions;
     }
 
     @Data
-    static class Permission{
+    static class Permission {
         @JsonProperty("prmUrl")
         String url;
 

@@ -1,7 +1,7 @@
 package com.nuctech.platform.exception;
 
 /**
- * Created by wangzunhui on 2017/8/7.
+ * Created by @author wangzunhui on 2017/8/7.
  */
 public class NuctechPlatformException extends RuntimeException {
     protected final String errorMsg;

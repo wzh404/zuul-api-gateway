@@ -32,7 +32,7 @@ public class NextHop {
                     .doHandshake(new WebSocketProxyRouteHandler(this, clientWebSocketSession), uri)
                     .get(5000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            throw new NuctechPlatformException("api_create_websocket_failed", e);
+            throw new NuctechPlatformException("Failed to create remote websocket", e);
         }
     }
 

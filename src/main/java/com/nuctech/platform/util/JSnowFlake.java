@@ -4,7 +4,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by wangzunhui on 2017/9/5.
+ * Created by @author wangzunhui on 2017/9/5.
  */
 public class JSnowFlake {
     // 0               41	           51			 63
@@ -31,6 +31,12 @@ public class JSnowFlake {
         this.sequence = 0;
     }
 
+    /**
+     * get next time stamp.
+     *
+     * @param lastTimeStamp
+     * @return
+     */
     private long nextTime(long lastTimeStamp){
         long timeStamp = System.currentTimeMillis();
         while (timeStamp <= lastTimeStamp){
@@ -40,6 +46,11 @@ public class JSnowFlake {
         return timeStamp;
     }
 
+    /**
+     * generate a new global unique number.
+     *
+     * @return
+     */
     public long nextId(){
         long currentTime = System.currentTimeMillis();
         if (currentTime < this.lastTimeStamp){

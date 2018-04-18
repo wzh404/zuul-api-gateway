@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
+</head>
+<body>
+<a href="#" onclick="javascript:a()">login!</a> |
+<a href="#" onclick="javascript:b()">websocket!</a>
+</br>
+<span id="msg_id" >----</span>
+
+<script type="text/javascript">
+
+    function Socket(url,callback) {
+        var socket = new WebSocket(url);
+
+        socket.onopen = function(event){
+            console.log("socket open.");
+            $('#msg_id').html('Opening...');
+            var message = {
+                type : 0,
+                username : "wzh"
+            };
+
+            socket.send(JSON.stringify(message));
+        }
+
+        socket.onmessage = function(event) {
+            callback(event);
+        }
+
+        socket.onclose = function(event) {
+            console.log("socket closed. " + event.code);
+            $('#msg_id').html('Closed');
+        }
+
+        socket.onerror = function(event) {
+            console.log("socket error.");
+            socket.close();
+        }
+        return socket;
+    }
+
+    function a() {
+        $.ajax({
+            type : "GET",
+            url : "/test/login",
+            cache:false,
+            data : {
+                "id" : "0001",
+                "name": "wzh404"
+            },
+            success : function(result) {
+                alert('ok');
+            }
+        });
+
+    }
+
+    function messageHandle(event) {
+        console.log("message handle");
+        //var d = JSON.parse(event.data);
+        //console.log(d.type);
+        $('#msg_id').html(event.data)
+    }
+
+    function b(){
+        var socket = new Socket("ws://localhost:8181/ws",messageHandle);
+    }
+
+
+</script>
+</body>
+</html>

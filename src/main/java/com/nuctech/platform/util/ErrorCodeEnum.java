@@ -5,20 +5,21 @@ package com.nuctech.platform.util;
  */
 
 public enum ErrorCodeEnum {
-    API_RATE_LIMITER("api.rate.limiter"),
-    API_TOKEN_NOT_FOUND("api_token_not_found"),
-    API_EMPTY_USER_PERMISSION("api_empty_user_permission"),
-    API_NOT_PERMIT("api_not_permit"),
-    API_INVALID_TOKEN("api_invalid_token"),
-    API_CSRF_OR_TOKEN_NOT_FOUND("api_csrf_or_token_not_found"),
-    API_INVALID_CSRF_TOKEN("api_invalid_csrf_token");
+    API_SUCCESS("OK"),
+    API_RATE_LIMITER("020010"),
+    API_EMPTY_USER_PERMISSION("020003"),
+    API_NOT_PERMIT("020002"),
+    API_INVALID_TOKEN("020001"),
+    API_CSRF_TOKEN_NOT_FOUND("020005"),
+    API_INVALID_CSRF_TOKEN("020006"),
+    API_INTERNAL_EXCEPTION("029999");
     private String code;
+
+    ErrorCodeEnum(String code){
+        this.code = code;
+    }
 
     public String getCode() {
         return code;
-    }
-
-    private ErrorCodeEnum(String code){
-        this.code = code;
     }
 }

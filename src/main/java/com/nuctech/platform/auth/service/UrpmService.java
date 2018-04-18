@@ -1,6 +1,7 @@
-package com.nuctech.platform.auth;
+package com.nuctech.platform.auth.service;
 
-import org.springframework.cloud.netflix.feign.FeignClient;
+import com.nuctech.platform.auth.bean.AuthorizeResponse;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,7 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @FeignClient(value = "user")
 @FunctionalInterface
-public interface UserService {
+public interface UrpmService {
+    /**
+     * Get user authority from urpm.
+     *
+     * @param uid user id.
+     * @return
+     */
     @RequestMapping(value = "/permission.json", method =RequestMethod.GET)
-    public UserPermission permits(@RequestParam(value = "uid") String uid);
+    AuthorizeResponse authorize(@RequestParam(value = "uid") String uid);
 }

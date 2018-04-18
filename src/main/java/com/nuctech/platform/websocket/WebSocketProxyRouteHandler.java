@@ -8,9 +8,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 /**
- * Proxy -> Backend.
+ * Proxy(api gateway) -> Backend(application).
  *
- * Created by wangzunhui on 2017/11/28.
+ * Created by @author wangzunhui on 2017/11/28.
  */
 public class WebSocketProxyRouteHandler extends AbstractWebSocketHandler {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketProxyRouteHandler.class);

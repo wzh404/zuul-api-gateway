@@ -1,8 +1,7 @@
 package com.nuctech.platform.controller;
 
-import com.nuctech.platform.auth.User;
-import com.nuctech.platform.auth.UserPermission;
-import com.nuctech.platform.auth.UserService;
+import com.nuctech.platform.auth.bean.User;
+import com.nuctech.platform.auth.service.UrpmService;
 import com.nuctech.platform.util.CryptoUtil;
 import com.nuctech.platform.util.HttpRequestUtil;
 import com.nuctech.platform.util.KeyPool;
@@ -30,7 +29,10 @@ public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
-    private UserService userService;
+    private UrpmService userService;
+
+    //@Autowired
+    //private RedisCacheManager redisCacheManager;
 
     @RequestMapping(value = "/home",method = RequestMethod.GET)
     public String home(HttpServletRequest request){
@@ -45,17 +47,20 @@ public class UserController {
         if (calSign.equalsIgnoreCase(sign)){
             logger.info("-------------Signatured----------");
         }
+
+
+
         return "please login";
     }
 
     @RequestMapping(value = "/403",method = RequestMethod.GET)
     public String unauth(){
-        logger.info("--------------403----------------");
-        UserPermission permission = userService.permits("admin");
+        //logger.info("--------------403----------------");
+        //AuthorizeResponse permission = userService.permits("admin");
         //logger.info("----------" + (permission==null? 0: permission.getPermissions().size()));
-        if (permission != null){
-            permission.getPermissions().forEach(s -> logger.info(s));
-        }
+        //if (permission != null){
+            //permission.getPermissions().forEach(s -> logger.info(s));
+        //}
         return "Unauthorized";
     }
 
@@ -70,7 +75,7 @@ public class UserController {
 
     @RequestMapping(value = "/hi",method = {RequestMethod.GET, RequestMethod.POST})
     public User sayHi(/*@RequestParam String name*/ @RequestBody User user){
-        logger.info(user.getTime() + " " + user.getType() + " {" + user.getName() + " - " + user.getFree() + ":" + user.getTotal() + "}");
+        //logger.info(user.getTime() + " " + user.getType() + " {" + user.getName() + " - " + user.getFree() + ":" + user.getTotal() + "}");
 
         return null;//userService.getUser(name);
     }
@@ -102,10 +107,10 @@ public class UserController {
 
     @RequestMapping(value = "/slogin",method = RequestMethod.GET)
     public User slogin(HttpServletResponse response, @RequestParam String name, @RequestParam String pwd){
-        String jwtToken = TokenUtil.generatorToken(name);
-        String csrfToken = TokenUtil.generatorCSRFToken(jwtToken);
+        //String jwtToken = ""; //TokenUtil.generatorToken(name);
+        String csrfToken = "";//TokenUtil.generatorCSRFToken();
 
-        Cookie cookie = new Cookie(TokenUtil.TOKEN, jwtToken);
+        Cookie cookie = new Cookie(TokenUtil.TOKEN, csrfToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
 
@@ -117,7 +122,7 @@ public class UserController {
 
         cookie.setSecure(false);
 
-        Cookie csrfCookie = new Cookie(TokenUtil.CSRF_TOKEN, csrfToken);
+        Cookie csrfCookie = new Cookie("tokens", csrfToken);
         cookie.setPath("/");
 
         response.addCookie(cookie);
@@ -139,13 +144,17 @@ public class UserController {
     }
 
     @RequestMapping(value = "/login",method = RequestMethod.GET)
-    public User login(HttpServletResponse response, @RequestParam String name, @RequestParam String pwd){
+    public Map<String, Object> login(HttpServletResponse response, @RequestParam String name, @RequestParam String pwd){
+        Map<String, Object> map = new HashMap<>();
+        map.put("flag", true);
         User user = new User();
-        //user.addRole("admin", new String[]{"a", "b"});
-        //user.addRole("user", new String[]{"u1", "u2"});
-        //user.setResultCode("OK");
-        //user.setResultMsg("ERROR");
-        logger.info("--------------login----------------");
-        return user;
+        user.setId("0001");
+        user.setName("wangzunhui");
+        user.setOrgId("haidian");
+        user.setTimeout(30);
+        map.put("result", user);
+        logger.info("---------------------------login-controller------");
+
+        return map;
     }
 }
