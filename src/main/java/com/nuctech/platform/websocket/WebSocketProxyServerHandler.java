@@ -137,6 +137,7 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
         logger.info("[c -> p] {} {}", uri, token.get());
         if (!auth(uri, token.get())){
             if (session.isOpen()){
+                logger.warn("Close websocket {}", session.getUri());
                 session.close(CloseStatus.NOT_ACCEPTABLE);
             }
             return;
