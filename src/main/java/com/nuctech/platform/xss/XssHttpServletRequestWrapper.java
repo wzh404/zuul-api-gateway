@@ -1,34 +1,39 @@
 package com.nuctech.platform.xss;
 
-import org.apache.commons.lang3.text.translate.AggregateTranslator;
-import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
-import org.apache.commons.lang3.text.translate.EntityArrays;
-import org.apache.commons.lang3.text.translate.LookupTranslator;
+import org.apache.commons.text.translate.AggregateTranslator;
+import org.apache.commons.text.translate.CharSequenceTranslator;
+import org.apache.commons.text.translate.EntityArrays;
+import org.apache.commons.text.translate.LookupTranslator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Created by wangzunhui on 2017/8/15.
+ * Created by @author wangzunhui on 2017/8/15.
  */
 public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
-    private static final String[][] BASIC_ESCAPE = {
-            {"&", "&amp;"},   // & - ampersand
-            {"<", "&lt;"},    // < - less-than
-            {">", "&gt;"},    // > - greater-than
-    };
-    private static final CharSequenceTranslator ESCAPE_HTML4 =
+    public static final Map<CharSequence, CharSequence> BASIC_ESCAPE;
+    static {
+        final Map<CharSequence, CharSequence> initialMap = new HashMap<>();
+        initialMap.put("&", "&amp;");   // & - ampersand
+        initialMap.put("<", "&lt;");    // < - less-than
+        initialMap.put(">", "&gt;");    // > - greater-than
+        BASIC_ESCAPE = Collections.unmodifiableMap(initialMap);
+    }
+
+    public static final CharSequenceTranslator ESCAPE_HTML4 =
             new AggregateTranslator(
-                    new LookupTranslator(XssHttpServletRequestWrapper.BASIC_ESCAPE()),
-                    new LookupTranslator(EntityArrays.ISO8859_1_ESCAPE()),
-                    new LookupTranslator(EntityArrays.HTML40_EXTENDED_ESCAPE())
+                    new LookupTranslator(XssHttpServletRequestWrapper.BASIC_ESCAPE),
+                    new LookupTranslator(EntityArrays.ISO8859_1_ESCAPE),
+                    new LookupTranslator(EntityArrays.HTML40_EXTENDED_ESCAPE)
             );
 
     public XssHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
     }
-
-    private static String[][] BASIC_ESCAPE() { return BASIC_ESCAPE.clone(); }
 
     @Override
     public String getHeader(String name) {
@@ -61,12 +66,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return escapeValues;
     }
 
-
-
-
     public static final String escapeHtml4(String input) {
         return ESCAPE_HTML4.translate(input);
     }
-
-
 }

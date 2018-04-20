@@ -64,7 +64,7 @@ public class TokenUtil {
     }
 
     /**
-     * genarate s-csrf-token by x-csrf-token.
+     * generate s-csrf-token by x-csrf-token.
      *
      * @param xCsrfToken
      * @return
@@ -106,11 +106,11 @@ public class TokenUtil {
     /**
      * get timestampe from x-csrf-token string.
      *
-     * @param xcsrfToken
+     * @param xCsrfToken
      * @return
      */
-    private static long getTokenTime(String xcsrfToken){
-        return Long.valueOf(xcsrfToken.substring(10, 23));
+    private static long getTokenTime(String xCsrfToken){
+        return Long.valueOf(xCsrfToken.substring(10, 23));
     }
 
     /**

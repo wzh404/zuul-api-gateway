@@ -89,10 +89,12 @@ public class RedisCache implements Cache<String, String> {
             lua.append("local timeout = tonumber(KEYS[4])\n");
             lua.append("local max_length = tonumber(KEYS[5])\n\n");
             lua.append("local len = redis.call('llen', key)\n");
+
             lua.append("if (len >= max_length) then\n");
             lua.append("local t = redis.call('lpop', key)\n");
             lua.append("redis.call('del', t)\n");
             lua.append("end\n\n");
+
             lua.append("redis.call('rpush', key, token)\n");
             //lua.append("redis.log(redis.LOG_WARNING, 'timeout = ' .. KEYS[2])\n");
             lua.append("redis.call('setex', token, timeout * 60, value)\n");

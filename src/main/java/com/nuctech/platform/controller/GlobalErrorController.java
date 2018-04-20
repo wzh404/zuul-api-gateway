@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
+ * ZuulExcepiton redirect to this controller.
+ *
  * Created by @author wangzunhui on 2018/4/16.
  */
 @Controller

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Created by wangzunhui on 2017/8/15.
+ * Created by @author wangzunhui on 2017/8/15.
  */
 @Configuration
 public class XssFilterConfiguration {
