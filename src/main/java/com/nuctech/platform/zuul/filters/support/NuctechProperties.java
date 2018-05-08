@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * Websocket configuration properties
+ *
  * Created by @author wangzunhui on 2018/4/19.
  */
 @ConfigurationProperties(prefix="nuctech")

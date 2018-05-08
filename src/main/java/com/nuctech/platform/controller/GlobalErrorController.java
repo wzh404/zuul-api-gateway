@@ -34,7 +34,7 @@ public class GlobalErrorController implements ErrorController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
         Map<String, Object> body = HttpRequestUtil.getErrorResultMap(ErrorCodeEnum.API_INTERNAL_EXCEPTION.getCode(), "zuul exception");
-        return  new ResponseEntity<>(body, getStatus(request));
+        return new ResponseEntity<>(body, getStatus(request));
     }
 
     protected HttpStatus getStatus(HttpServletRequest request) {

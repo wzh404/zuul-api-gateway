@@ -3,8 +3,6 @@ package com.nuctech.platform.cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.RedisScript;
 
@@ -17,7 +15,39 @@ import java.util.concurrent.TimeUnit;
  */
 public class RedisCache implements Cache<String, String> {
     private final Logger logger = LoggerFactory.getLogger(RedisCache.class);
-    private static final StringBuilder lua = new StringBuilder();
+    private static RedisScript luaScript;
+
+    /*
+     * Create redis lua script. atomic operation
+     *
+     * KEYS[1] key : list key
+     * KEYS[2] token : list key value
+     * KEYS[3] value : token value
+     * KEYS[4] timeout : token expired time.
+     * KEYS[5] max_length: List max size.
+     */
+    static {
+        StringBuilder lua = new StringBuilder();
+        lua.append("local key = KEYS[1]\n");
+        lua.append("local token = KEYS[2]\n");
+        lua.append("local value = KEYS[3]\n");
+        lua.append("local timeout = tonumber(KEYS[4])\n");
+        lua.append("local max_length = tonumber(KEYS[5])\n\n");
+        lua.append("local len = redis.call('llen', key)\n");
+
+        lua.append("if (len >= max_length) then\n");
+        lua.append("local t = redis.call('lpop', key)\n");
+        lua.append("redis.call('del', t)\n");
+        lua.append("end\n\n");
+
+        lua.append("redis.call('rpush', key, token)\n");
+
+        /* lua.append("redis.log(redis.LOG_WARNING, 'timeout = ' .. KEYS[2])\n"); */
+        lua.append("redis.call('setex', token, timeout * 60, value)\n");
+        lua.append("return\n");
+
+        luaScript = RedisScript.of(lua.toString());
+    }
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -64,43 +94,6 @@ public class RedisCache implements Cache<String, String> {
         keys.add(Long.toString(timeout));
         keys.add(Integer.toString(maxLength));
 
-        redisTemplate.execute(getLuaScript(), keys);
-    }
-
-    /**
-     * create lua script.
-     *
-     * @return
-     */
-    private RedisScript getLuaScript(){
-        if (lua.length() > 0){
-            return RedisScript.of(lua.toString());
-        }
-
-        synchronized (lua){
-            // Prevent multi-threaded append lua scripts.
-            if (lua.length() > 0){
-                return RedisScript.of(lua.toString());
-            }
-
-            lua.append("local key = KEYS[1]\n");
-            lua.append("local token = KEYS[2]\n");
-            lua.append("local value = KEYS[3]\n");
-            lua.append("local timeout = tonumber(KEYS[4])\n");
-            lua.append("local max_length = tonumber(KEYS[5])\n\n");
-            lua.append("local len = redis.call('llen', key)\n");
-
-            lua.append("if (len >= max_length) then\n");
-            lua.append("local t = redis.call('lpop', key)\n");
-            lua.append("redis.call('del', t)\n");
-            lua.append("end\n\n");
-
-            lua.append("redis.call('rpush', key, token)\n");
-            //lua.append("redis.log(redis.LOG_WARNING, 'timeout = ' .. KEYS[2])\n");
-            lua.append("redis.call('setex', token, timeout * 60, value)\n");
-            lua.append("return\n");
-
-            return RedisScript.of(lua.toString());
-        }
+        redisTemplate.execute(luaScript, keys);
     }
 }

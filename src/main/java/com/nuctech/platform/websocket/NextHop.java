@@ -26,6 +26,12 @@ public class NextHop {
         remoteWebSocketSession = createWebSocketClientSession(clientWebSocketSession);
     }
 
+    /**
+     * Create websocket with remote server.
+     *
+     * @param clientWebSocketSession
+     * @return
+     */
     private WebSocketSession createWebSocketClientSession(WebSocketSession clientWebSocketSession) {
         try {
             return new StandardWebSocketClient()
@@ -36,11 +42,22 @@ public class NextHop {
         }
     }
 
+    /**
+     * Send message to the remote server.
+     *
+     * @param webSocketMessage
+     * @throws IOException
+     */
     public void sendMessage(WebSocketMessage<?> webSocketMessage) throws IOException {
         logger.info("send message {} to remote {}", webSocketMessage.getPayload().toString(), remoteWebSocketSession.getId());
         remoteWebSocketSession.sendMessage(webSocketMessage);
     }
 
+    /**
+     * Close remote websocket session.
+     *
+     * @throws IOException
+     */
     public void closeRemote() throws IOException {
         if (remoteWebSocketSession.isOpen()) {
             logger.info("closing remote {} websocket server.", remoteWebSocketSession.getId());
@@ -48,6 +65,11 @@ public class NextHop {
         }
     }
 
+    /**
+     * Close client websocket session.
+     *
+     * @throws IOException
+     */
     public void closeClient() throws IOException {
         if (clientWebSocketSession.isOpen()) {
             logger.info("closing client {} websocket server.", clientWebSocketSession.getId());

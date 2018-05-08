@@ -56,5 +56,5 @@ public interface Cache<K, V> {
      * @param seconds time out
      * @param maxLength list max length
      */
-    public void set(final K key, final K token, final V value, long seconds, int maxLength);
+    void set(final K key, final K token, final V value, long seconds, int maxLength);
 }

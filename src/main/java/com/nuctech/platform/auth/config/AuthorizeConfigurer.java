@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Automatically inject beans into the Spring context.
+ * 自动注入bean到Spring上下文.
+ *
  * Created by @author wangzunhui on 2018/4/13.
  */
 @Configuration

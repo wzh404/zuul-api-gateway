@@ -1,9 +1,6 @@
 package com.nuctech.platform.cache;
 
 import com.google.common.cache.CacheBuilder;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**

@@ -16,6 +16,11 @@ public class KeyPool {
 
     private static Key key;
 
+    /**
+     * Inject static or dynamic keys according to the configuration.
+     *
+     * @param k Key
+     */
     @Autowired
     public void setKey(Key k){
         synchronized(KeyPool.class){

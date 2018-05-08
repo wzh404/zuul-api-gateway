@@ -4,7 +4,7 @@ package com.nuctech.platform.auth.key;
  * Created by @author wangzunhui on 2018/4/15.
  */
 public class StaticKey implements Key{
-    private final String[] KEYS = {
+    private static final String[] KEYS = {
             "0c798770-9b3a-4c2c-91d4-76034acd460a",
             "e5c79afd-76f7-4ce9-a507-12e3829fcee3",
             "61ad65e9-2ec4-4533-bbc1-aec1df434c1d",

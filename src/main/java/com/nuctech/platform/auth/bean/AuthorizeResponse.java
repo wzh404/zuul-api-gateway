@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * User authority returned from the urpm.
+ *
  * <p>
  * Created by @author wangzunhui on 2017/10/17.
  */

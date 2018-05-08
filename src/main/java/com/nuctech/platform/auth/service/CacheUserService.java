@@ -3,7 +3,10 @@ package com.nuctech.platform.auth.service;
 import com.nuctech.platform.auth.bean.User;
 import com.nuctech.platform.cache.Cache;
 import com.nuctech.platform.util.TokenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +18,12 @@ import java.util.concurrent.TimeUnit;
  * Created by @author wangzunhui on 2018/4/11.
  */
 public class CacheUserService extends AbstractUserService {
+    private final Logger logger = LoggerFactory.getLogger(CacheUserService.class);
+    private int defaultTimeout = 30;
+
+    @Value(value = "${nuctech.user.online.number}")
+    private int online;
+
     @Autowired
     private Cache<String, String> cache;
 
@@ -27,10 +36,17 @@ public class CacheUserService extends AbstractUserService {
     public String createToken(User user) {
         String token = TokenUtil.createSessionId();
         long timeout = user.getTimeout();
+        if (timeout <= 0){
+            timeout = defaultTimeout;
+        }
 
-        // Ensure that one user is up to five online.
-        cache.set(user.getId(), token, u2j(user), timeout <= 0 ? 30 : timeout, 5);
-
+        logger.debug("default user online number is {}", online);
+        if (online > 0) {
+            // 限制用户在线人数.
+            cache.set(user.getId(), token, u2j(user), timeout, online);
+        } else {
+            cache.set(token, u2j(user), timeout, TimeUnit.MINUTES);
+        }
         return token;
     }
 

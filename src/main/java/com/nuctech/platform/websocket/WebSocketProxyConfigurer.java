@@ -37,6 +37,11 @@ public class WebSocketProxyConfigurer implements WebSocketConfigurer {
     @Autowired
     private NuctechProperties nuctechProperties;
 
+    /**
+     * 加载websocket代理配置，并注册。
+     *
+     * @param registry
+     */
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         nuctechProperties.getWebsockets().forEach((k, v) ->{

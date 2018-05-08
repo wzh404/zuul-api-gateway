@@ -16,6 +16,7 @@ import static com.nuctech.platform.util.ErrorCodeEnum.API_NOT_PERMIT;
 import static com.nuctech.platform.util.ErrorCodeEnum.API_SUCCESS;
 
 /**
+ *
  * Created by @author wangzunhui on 2018/4/12.
  */
 public abstract  class AbstractUserService implements UserService{
@@ -31,7 +32,7 @@ public abstract  class AbstractUserService implements UserService{
      * @param uid user id
      * @return the list of user authority
      */
-    private List<String> getUrpmAuthority(String uid) {
+    private List<String> getUrpmAuthorize(String uid) {
         return urpmService.authorize(uid).getUserAuthority();
     }
 
@@ -51,16 +52,27 @@ public abstract  class AbstractUserService implements UserService{
      */
     public abstract void setAuthorize(String uid, List<String> uris);
 
+     /*
+      * <p>The mapping matches URLs using the following rules:<br>
+      * <ul>
+      * <li>{@code ?} matches one character</li>
+      * <li>{@code *} matches zero or more characters</li>
+      * <li>{@code **} matches zero or more <em>directories</em> in a path</li>
+      * <li>{@code {spring:[a-z]+}} matches the regexp {@code [a-z]+} as a path variable named "spring"</li>
+      * </ul>
+      */
     @Override
     public ErrorCodeEnum checkAuthorize(String uid, String uri) {
+        // Get user Authorize from cache.
         List<String> uris = getAuthorize(uid);
         if (uris == null || uris.isEmpty()){
-            logger.warn("user authorize cache misses");
-            uris = getUrpmAuthority(uid);
+            logger.warn("User authorize cache misses");
+            uris = getUrpmAuthorize(uid);
             if (uris.isEmpty()) {
                 return API_EMPTY_USER_PERMISSION;
             }
 
+            // Cache user authorize.
             setAuthorize(uid, uris);
         }
 
@@ -93,8 +105,15 @@ public abstract  class AbstractUserService implements UserService{
         }
     }
 
+    /**
+     * convert user to json string.
+     *
+     * @param user
+     * @return
+     */
     public String u2j(User user){
         if (user == null){
+            logger.warn("user is null");
             return null;
         }
         try {

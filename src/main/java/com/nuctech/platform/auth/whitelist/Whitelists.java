@@ -9,6 +9,8 @@ import org.springframework.util.AntPathMatcher;
 import java.util.Arrays;
 
 /**
+ * Authentication and authorization whitelist.
+ *
  * Created by @author wangzunhui on 2018/4/13.
  */
 @Component
@@ -16,7 +18,7 @@ public class Whitelists {
     private final Logger logger = LoggerFactory.getLogger(Whitelists.class);
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    // 鉴权
+    // 授权
     @Value(value = "${nuctech.whitelist.authorize}")
     private String[] authorize;
 

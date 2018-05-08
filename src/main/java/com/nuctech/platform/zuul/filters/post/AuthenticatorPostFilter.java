@@ -60,13 +60,17 @@ public class AuthenticatorPostFilter extends ZuulFilter {
         InputStream stream = ctx.getResponseDataStream();
 
         try {
+            // Get response body from stream.
             String body = StreamUtils.copyToString(stream, Charset.forName("UTF-8"));
+            // Convert response body to AuthenticatorResponse bean.
             AuthenticatorResponse login = (new ObjectMapper()).readValue(body, AuthenticatorResponse.class);
             handleLogged(login);
+            // Set response body.
             ctx.setResponseBody(body);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("convert login response to json failed.");
+            throw new ZuulException(e, 500, "runtime exception");
         }
 
         return null;
@@ -81,8 +85,10 @@ public class AuthenticatorPostFilter extends ZuulFilter {
     private void addCookie(String key, String value) {
         RequestContext ctx = RequestContext.getCurrentContext();
 
-        Cookie c = new Cookie(key, value);
-        //c.setSecure(true);
+        final Cookie c = new Cookie(key, value);
+        if (ctx.getRequest().isSecure()){
+            c.setSecure(true);
+        }
         c.setHttpOnly(true);
         c.setPath("/");
         ctx.getResponse().addCookie(c);

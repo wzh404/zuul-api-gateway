@@ -7,12 +7,12 @@ import com.nuctech.platform.util.ErrorCodeEnum;
 import com.nuctech.platform.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,17 +95,12 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
         }
 
         String[] cookies = cookieValue.split(";");
-        for (String c : cookies){
-            c = c.trim();
-            // Base64 encrypted data contains equal sign
-            if (c.startsWith(name + "=")){
-                String v = c.substring(name.length() + 1);
-                return Optional.of(v);
-            }
-        }
-
-        logger.warn("cookie {} not found ", name);
-        return Optional.empty();
+        // Base64 encrypted data contains equal sign
+        return Arrays.stream(cookies)
+                .map(String::trim)
+                .filter(c -> c.startsWith(name + "="))
+                .findFirst()
+                .map(c -> c.substring(name.length() + 1));
     }
 
     /**
@@ -134,13 +129,9 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
         logger.info("client {} websocket connected.", session.getId());
         Optional<String> token = getCookie(session, TokenUtil.TOKEN);
         String uri = session.getUri().toString();
-        logger.info("[c -> p] {} {}", uri, token.get());
-        if (!auth(uri, token.get())){
-            if (session.isOpen()){
-                logger.warn("Close websocket {}", session.getUri());
-                session.close(CloseStatus.NOT_ACCEPTABLE);
-            }
-            return;
+        if (!auth(uri, token.get()) && session.isOpen()){
+            logger.warn("Close websocket {}", session.getUri());
+            session.close(CloseStatus.NOT_ACCEPTABLE);
         }
     }
 
@@ -156,6 +147,5 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
         logger.info("client {} websocket closed.", session.getId());
         getNextHop(session).closeRemote();
         nextHops.remove(session.getId());
-        logger.info("nextHops caches size {}.", nextHops.size());
     }
 }
