@@ -15,9 +15,9 @@ public interface UrpmService {
     /**
      * Get user authority from urpm.
      *
-     * @param uid user id.
+     * @param account user account.
      * @return
      */
-    @RequestMapping(value = "/permission.json", method =RequestMethod.GET)
-    AuthorizeResponse authorize(@RequestParam(value = "uid") String uid);
+    @RequestMapping(value = "${nuctech.user.prms}", method =RequestMethod.POST)
+    AuthorizeResponse authorize(@RequestParam(value = "account") String account);
 }

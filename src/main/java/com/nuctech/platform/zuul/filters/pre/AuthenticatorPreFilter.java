@@ -9,6 +9,7 @@ import com.nuctech.platform.util.HttpRequestUtil;
 import com.nuctech.platform.util.JSnowFlake;
 import com.nuctech.platform.util.TokenUtil;
 import com.nuctech.platform.zuul.filters.support.FilterConstants;
+import com.nuctech.platform.zuul.filters.support.HystrixThreadContext;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,9 @@ public class AuthenticatorPreFilter extends ZuulFilter {
     @Override
     public boolean shouldFilter() {
         RequestContext ctx = RequestContext.getCurrentContext();
+
+        String clientIP = HttpRequestUtil.getRemoteAddr(ctx.getRequest());
+        HystrixThreadContext.set(clientIP);
 
         // generate a unique tracking number.
         String trackingNumber = Long.toString(traceGen.nextId());

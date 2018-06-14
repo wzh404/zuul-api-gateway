@@ -6,18 +6,14 @@ import com.nuctech.platform.zuul.filters.support.NuctechProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.netflix.zuul.filters.ZuulProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.client.standard.WebSocketContainerFactoryBean;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by @author wangzunhui on 2017/11/28.
@@ -37,6 +33,9 @@ public class WebSocketProxyConfigurer implements WebSocketConfigurer {
     @Autowired
     private NuctechProperties nuctechProperties;
 
+    @Autowired
+    private LoadBalancerClient loadBalancerClient;
+
     /**
      * 加载websocket代理配置，并注册。
      *
@@ -45,11 +44,9 @@ public class WebSocketProxyConfigurer implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         nuctechProperties.getWebsockets().forEach((k, v) ->{
-            StringBuilder uri = new StringBuilder("ws://");
-            uri.append(v.getRemoteUri());
-            uri.append(v.getPath());
-            logger.info("{} mapping websocket: {} -> {}", k, v.getPath(), uri);
-            registry.addHandler(new WebSocketProxyServerHandler(userService, whitelists, uri.toString()), v.getPath());
+            logger.info("------------{} mapping websocket: {}------", k, v.getPath());
+            WebSocketProxyServerHandler handler = new WebSocketProxyServerHandler(userService, whitelists, v.getPath(), loadBalancerClient, k);
+            registry.addHandler(handler, v.getPath());
         });
     }
 

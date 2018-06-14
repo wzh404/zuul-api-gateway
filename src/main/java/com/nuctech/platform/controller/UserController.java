@@ -9,6 +9,7 @@ import com.nuctech.platform.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -31,7 +32,9 @@ public class UserController {
     @Autowired
     private UrpmService userService;
 
-    //@Autowired
+    @Autowired
+    private LoadBalancerClient loadBalancerClient;
+
     //private RedisCacheManager redisCacheManager;
 
     @RequestMapping(value = "/home",method = RequestMethod.GET)
@@ -64,11 +67,18 @@ public class UserController {
         return "Unauthorized";
     }
 
+    @RequestMapping(value = "/ping",method = RequestMethod.GET)
+    public String ping(){
+        logger.info("--------------PING----------------");
+        return "OK";
+    }
+
     @RequestMapping(value = "/i18n",method = RequestMethod.GET)
     public String i18n(HttpServletRequest request, @RequestParam String v1){
 
         String ip = HttpRequestUtil.getRemoteAddr(request);
-        logger.info("[" + ip + "]");
+        loadBalancerClient.choose("test");
+        logger.info("[" + ip + "]" + loadBalancerClient.getClass().getName());
 //        throw new IllegalStateException("test");
         return "i18n";
     }
@@ -147,11 +157,17 @@ public class UserController {
     public Map<String, Object> login(HttpServletResponse response, @RequestParam String name, @RequestParam String pwd){
         Map<String, Object> map = new HashMap<>();
         map.put("flag", true);
-        User user = new User();
-        user.setId("0001");
-        user.setName("wangzunhui");
-        user.setOrgId("haidian");
-        user.setTimeout(30);
+        Map<String, Object> user = new HashMap<>();
+        //User user = new User();
+        user.put("account", "0001");
+        user.put("userName", "wangzunhui");
+        user.put("orgId", "haidian");
+        //user.put("timeout", 0);
+
+        //user.setId("0001");
+        //user.setName("wangzunhui");
+        //user.setOrgId("haidian");
+        //user.setTimeout(30);
         map.put("result", user);
         logger.info("---------------------------login-controller------");
 

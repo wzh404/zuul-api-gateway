@@ -28,11 +28,13 @@ public class AuthenticatorResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public class Result{
-        private String id;
-        private String name;
+        private String account;
+        private String userName;
         private String orgId;
         /** user session timeout */
-        private Integer timeout;
+        private Integer sessionTimeout;
+        /** Maximum number of logins per user */
+        private Integer sessionNumPerUser;
     }
 
     /**
@@ -42,13 +44,18 @@ public class AuthenticatorResponse {
      */
     public User asUser(){
         User user = new User();
-        user.setId(getResult().getId());
-        user.setName(getResult().getName());
+        user.setId(getResult().getAccount());
+        user.setName(getResult().getUserName());
         user.setOrgId(getResult().getOrgId());
-        user.setTimeout(getResult().getTimeout());
+
+        Integer timeout = getResult().getSessionTimeout();
+        user.setTimeout(timeout == null ? 0 : timeout);
+
+        Integer numPerUser = getResult().getSessionNumPerUser();
+        user.setNumPerUser(numPerUser == null ? 0 : numPerUser);
+
         // The login time.
         user.setCreateTime(String.valueOf(System.currentTimeMillis()));
-
         return user;
     }
 }

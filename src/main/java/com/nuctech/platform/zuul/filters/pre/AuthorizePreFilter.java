@@ -49,6 +49,7 @@ public class AuthorizePreFilter extends ZuulFilter {
 
         // Check if uri is in the white list
         if (whitelists.inAuthorize(uri)){
+            logger.warn("{} in authorize white list", uri);
             return false;
         }
         return ctx.sendZuulResponse();

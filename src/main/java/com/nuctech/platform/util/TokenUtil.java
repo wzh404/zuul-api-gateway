@@ -1,9 +1,11 @@
 package com.nuctech.platform.util;
 
+import com.google.common.hash.Hashing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Random;
@@ -162,7 +164,6 @@ public class TokenUtil {
         return Optional.of(payload);
     }
 
-    /*
     public static String createSessionId(String uid){
         ByteBuffer bb = ByteBuffer.wrap(new byte[32]);
 
@@ -176,7 +177,6 @@ public class TokenUtil {
 
         return byteArrayToHexStr(bb.array());
     }
-*/
 
     /**
      * generate user login session id.

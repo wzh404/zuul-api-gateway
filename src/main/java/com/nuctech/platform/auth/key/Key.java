@@ -5,6 +5,7 @@ package com.nuctech.platform.auth.key;
  *
  * Created by @author wangzunhui on 2018/4/15.
  */
+@FunctionalInterface
 public interface Key {
     /**
      * get the hash key form the key pool by index.

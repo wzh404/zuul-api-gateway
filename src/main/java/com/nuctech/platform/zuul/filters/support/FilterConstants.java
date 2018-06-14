@@ -37,5 +37,5 @@ public interface FilterConstants {
     /**
      * Filter Order for {@link com.nuctech.platform.zuul.filters.route.SignatureRouteFilter#filterOrder()}
      */
-    int ROUTING_SIGNATURE_FILTER_ORDER = 15;
+    int ROUTING_SIGNATURE_FILTER_ORDER = 8;
 }

@@ -1,7 +1,5 @@
 package com.nuctech.platform.auth.whitelist;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -15,7 +13,6 @@ import java.util.Arrays;
  */
 @Component
 public class Whitelists {
-    private final Logger logger = LoggerFactory.getLogger(Whitelists.class);
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     // 授权

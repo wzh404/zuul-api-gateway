@@ -79,7 +79,6 @@ public class HttpRequestUtil {
             int index = ip.indexOf(',');
             return Optional.of(index == -1 ? ip : ip.substring(0, index));
         }
-
         return Optional.empty();
     }
 

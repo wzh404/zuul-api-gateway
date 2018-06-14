@@ -1,7 +1,5 @@
 package com.nuctech.platform.cache;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -14,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * Created by @author wangzunhui on 2018/4/12.
  */
 public class RedisCache implements Cache<String, String> {
-    private final Logger logger = LoggerFactory.getLogger(RedisCache.class);
+    //private final Logger logger = LoggerFactory.getLogger(RedisCache.class);
     private static RedisScript luaScript;
 
     /*

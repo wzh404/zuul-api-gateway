@@ -68,8 +68,7 @@ public class AuthenticatorPostFilter extends ZuulFilter {
             // Set response body.
             ctx.setResponseBody(body);
         } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("convert login response to json failed.");
+            logger.error("convert login response to json failed.", e);
             throw new ZuulException(e, 500, "runtime exception");
         }
 

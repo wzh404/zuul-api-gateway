@@ -24,6 +24,8 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 public class SignatureRouteFilter extends ZuulFilter {
     private final Logger logger = LoggerFactory.getLogger(SignatureRouteFilter.class);
 
+
+
     @Autowired
     private Whitelists whitelists;
 
@@ -62,7 +64,7 @@ public class SignatureRouteFilter extends ZuulFilter {
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
         String uri = ctx.getRequest().getRequestURI();
-
+        logger.info("route to " + uri);
         if (whitelists.inAuthenticator(uri)) {
             return null;
         }
@@ -72,7 +74,6 @@ public class SignatureRouteFilter extends ZuulFilter {
         assert user != null : "The user information cannot be empty";
         assert tid != null : "Request tracking number cannot be empty";
 
-        logger.info("route to " + uri);
         String signed = CryptoUtil.signature(KeyPool.getKey(tid), user.getId(), tid);
 
         // user id

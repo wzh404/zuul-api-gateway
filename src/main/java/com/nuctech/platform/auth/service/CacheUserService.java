@@ -6,7 +6,6 @@ import com.nuctech.platform.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,10 +18,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class CacheUserService extends AbstractUserService {
     private final Logger logger = LoggerFactory.getLogger(CacheUserService.class);
-    private int defaultTimeout = 30;
-
-    @Value(value = "${nuctech.user.online.number}")
-    private int online;
 
     @Autowired
     private Cache<String, String> cache;
@@ -40,6 +35,7 @@ public class CacheUserService extends AbstractUserService {
             timeout = defaultTimeout;
         }
 
+        int online = user.getNumPerUser();
         logger.debug("default user online number is {}", online);
         if (online > 0) {
             // 限制用户在线人数.
@@ -52,7 +48,7 @@ public class CacheUserService extends AbstractUserService {
 
     @Override
     public List<String> getAuthorize(String uid) {
-        String join = cache.get(uid);
+        String join = cache.get(prefixUserPermission + uid);
         if (join == null) {
             return new ArrayList<>();
         }
@@ -62,6 +58,6 @@ public class CacheUserService extends AbstractUserService {
 
     @Override
     public void setAuthorize(String uid, List<String> uris) {
-        cache.set(uid, String.join(",", uris));
+        cache.set(prefixUserPermission + uid, String.join(",", uris));
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Created by @author wangzunhui on 2018/4/15.
  */
 public class CacheKey implements Key {
-    private final String keyPrefix = "key:";
+    private static final String KEY_PREFIX = "key:";
     private int keyPoolSize = 1024;
 
     @Autowired
@@ -20,7 +20,7 @@ public class CacheKey implements Key {
 
     @Override
     public String get(int index) {
-        String key = keyPrefix + Math.abs(index) % keyPoolSize;
+        String key = KEY_PREFIX + Math.abs(index) % keyPoolSize;
         String value = cache.get(key);
         if (value != null){
             return value;

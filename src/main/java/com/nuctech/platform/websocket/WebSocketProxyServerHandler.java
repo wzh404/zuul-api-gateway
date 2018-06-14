@@ -7,6 +7,8 @@ import com.nuctech.platform.util.ErrorCodeEnum;
 import com.nuctech.platform.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -29,11 +31,15 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
     private final String remoteUri;
     private final UserService userService;
     private final Whitelists whitelists;
+    private final LoadBalancerClient loadBalancerClient;
+    private final String serviceId;
 
-    public WebSocketProxyServerHandler(UserService userService, Whitelists whitelists, String remoteUri){
+    public WebSocketProxyServerHandler(UserService userService, Whitelists whitelists, String remoteUri,LoadBalancerClient lb, String serviceId){
         this.userService = userService;
         this.whitelists = whitelists;
         this.remoteUri = remoteUri;
+        this.loadBalancerClient = lb;
+        this.serviceId = serviceId;
     }
 
     /**
@@ -112,7 +118,16 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
     private NextHop getNextHop(WebSocketSession webSocketSession) {
         NextHop nextHop = nextHops.get(webSocketSession.getId());
         if (nextHop == null) {
-            nextHop = new NextHop(webSocketSession, remoteUri);
+            ServiceInstance serviceInstance = loadBalancerClient.choose(serviceId);
+            StringBuilder uri = new StringBuilder("ws://");
+            uri.append(serviceInstance.getHost());
+            uri.append(":");
+            uri.append(serviceInstance.getPort());
+            uri.append(remoteUri);
+            logger.info("websocket uri is {}", uri);
+
+            nextHop = new NextHop(webSocketSession, uri.toString());
+            logger.info("put session {}", webSocketSession.getId());
             nextHops.put(webSocketSession.getId(), nextHop);
         }
         return nextHop;
@@ -129,7 +144,7 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
         logger.info("client {} websocket connected.", session.getId());
         Optional<String> token = getCookie(session, TokenUtil.TOKEN);
         String uri = session.getUri().toString();
-        if (!auth(uri, token.get()) && session.isOpen()){
+        if (!auth(uri, token.orElse("")) && session.isOpen()){
             logger.warn("Close websocket {}", session.getUri());
             session.close(CloseStatus.NOT_ACCEPTABLE);
         }
@@ -145,7 +160,10 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         logger.info("client {} websocket closed.", session.getId());
-        getNextHop(session).closeRemote();
-        nextHops.remove(session.getId());
+        NextHop nextHop = nextHops.get(session.getId());
+        if (nextHop != null) {
+            nextHop.closeRemote();
+            nextHops.remove(session.getId());
+        }
     }
 }

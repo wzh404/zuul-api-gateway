@@ -9,12 +9,10 @@ import com.nuctech.platform.zuul.filters.support.FilterConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-
-import javax.ws.rs.HttpMethod;
 
 import static com.nuctech.platform.util.ErrorCodeEnum.API_CSRF_TOKEN_NOT_FOUND;
 import static com.nuctech.platform.util.ErrorCodeEnum.API_INVALID_CSRF_TOKEN;
@@ -51,9 +49,9 @@ public class CsrfPreFilter extends ZuulFilter {
             return false;
         }
 
-        if (!HttpMethod.POST.equalsIgnoreCase(ctx.getRequest().getMethod()) &&
-            !HttpMethod.PUT.equalsIgnoreCase(ctx.getRequest().getMethod()) &&
-            !HttpMethod.DELETE.equalsIgnoreCase(ctx.getRequest().getMethod())){
+        if (!HttpMethod.POST.matches(ctx.getRequest().getMethod().toUpperCase()) &&
+            !HttpMethod.PUT.matches(ctx.getRequest().getMethod().toUpperCase()) &&
+            !HttpMethod.DELETE.matches(ctx.getRequest().getMethod().toUpperCase())){
             return false;
         }
 

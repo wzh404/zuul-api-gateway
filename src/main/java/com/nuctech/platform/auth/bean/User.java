@@ -16,4 +16,7 @@ public class User {
     private int status;
     /** token timeout */
     private int timeout;
+
+    /** Maximum number of logins per user */
+    private Integer numPerUser;
 }

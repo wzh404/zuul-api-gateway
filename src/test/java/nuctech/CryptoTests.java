@@ -9,9 +9,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.nio.charset.Charset;
 import java.util.Random;
+import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 
 /**
  * Created by wangzunhui on 2017/8/12.
@@ -21,6 +23,7 @@ public class CryptoTests {
 
     @org.junit.Test
     public void testKeyPool() {
+
         String key = KeyPool.getKey("wangzh-ok");
         logger.info("key is " + key);
         /*for (int i = 0; i < 32; i++){
@@ -48,6 +51,7 @@ public class CryptoTests {
 
         //String token = String.valueOf(Math.round(r)).substring(0,len);
 
+        //AbstractQueuedSynchronizer
         String token = TokenUtil.generateXCSRFToken();
         logger.info("token is {}", token);
         //Thread.sleep(13000L);

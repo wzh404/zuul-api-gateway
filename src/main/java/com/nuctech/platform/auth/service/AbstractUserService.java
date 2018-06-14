@@ -22,6 +22,8 @@ import static com.nuctech.platform.util.ErrorCodeEnum.API_SUCCESS;
 public abstract  class AbstractUserService implements UserService{
     private final Logger logger = LoggerFactory.getLogger(AbstractUserService.class);
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
+    protected int defaultTimeout = 30;
+    protected String prefixUserPermission = "user:prms:";
 
     @Autowired
     private UrpmService urpmService;
