@@ -1,13 +1,17 @@
 package com.nuctech.platform.websocket;
 
+import com.nuctech.platform.auth.bean.User;
 import com.nuctech.platform.exception.NuctechPlatformException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,9 +23,11 @@ public class NextHop {
     private final WebSocketSession remoteWebSocketSession;
     private final WebSocketSession clientWebSocketSession;
     private final String uri;
+    private final Optional<User> user;
 
-    public NextHop(WebSocketSession clientWebSocketSession, String uri) {
+    public NextHop(WebSocketSession clientWebSocketSession, String uri, Optional<User> user) {
         this.uri = uri;
+        this.user = user;
         this.clientWebSocketSession = clientWebSocketSession;
         remoteWebSocketSession = createWebSocketClientSession(clientWebSocketSession);
     }
@@ -34,8 +40,13 @@ public class NextHop {
      */
     private WebSocketSession createWebSocketClientSession(WebSocketSession clientWebSocketSession) {
         try {
+            WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+            user.ifPresent(u ->{
+                headers.add("X-APP-UID", u.getId());
+                headers.add("X-APP-OID", u.getOrgId());
+            });
             return new StandardWebSocketClient()
-                    .doHandshake(new WebSocketProxyRouteHandler(this, clientWebSocketSession), uri)
+                    .doHandshake(new WebSocketProxyRouteHandler(this, clientWebSocketSession), headers, new URI(uri))
                     .get(5000, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             throw new NuctechPlatformException("Failed to create remote websocket", e);

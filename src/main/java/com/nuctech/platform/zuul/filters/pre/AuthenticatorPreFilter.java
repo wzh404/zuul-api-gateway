@@ -85,12 +85,13 @@ public class AuthenticatorPreFilter extends ZuulFilter {
         Optional<String> token = HttpRequestUtil.getCookieValue(ctx.getRequest(), TokenUtil.TOKEN);
         logger.info("token is {}", token);
 
-        return token.map(userService::getUser)
-                .map(this::setAttribute)
-                .orElseGet(() -> {
+        return token
+               .map(userService::getUser)
+               .map(this::setAttribute)
+               .orElseGet(() -> {
                     HttpRequestUtil.rejectZuul(HttpStatus.OK.value(), API_INVALID_TOKEN);
                     return null;
-                });
+               });
     }
 
     /**

@@ -33,6 +33,7 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
     private final Whitelists whitelists;
     private final LoadBalancerClient loadBalancerClient;
     private final String serviceId;
+    private Optional<User> user = Optional.empty();
 
     public WebSocketProxyServerHandler(UserService userService, Whitelists whitelists, String remoteUri,LoadBalancerClient lb, String serviceId){
         this.userService = userService;
@@ -71,7 +72,7 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
             return false;
         }
 
-        Optional<User> user = userService.getUser(token);
+        this.user = userService.getUser(token);
         if (!user.isPresent()){
             logger.warn("The user is not logged in");
             return false;
@@ -126,7 +127,7 @@ public class WebSocketProxyServerHandler extends AbstractWebSocketHandler {
             uri.append(remoteUri);
             logger.info("websocket uri is {}", uri);
 
-            nextHop = new NextHop(webSocketSession, uri.toString());
+            nextHop = new NextHop(webSocketSession, uri.toString(), this.user);
             logger.info("put session {}", webSocketSession.getId());
             nextHops.put(webSocketSession.getId(), nextHop);
         }
